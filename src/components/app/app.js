@@ -19,7 +19,8 @@ export default class App extends Component {
             this.createItem("Create Awesome Project"),
             this.createItem("Have a lunch")
         ],
-        filter: ''
+        filter: '',
+        flag: 'all' // done active all
     }
 
     createItem(label) {
@@ -114,22 +115,42 @@ export default class App extends Component {
         this.setState({
             filter: label
         });
-    } 
+    }
+
+    toggleFlags(tasks, flag) {
+        switch (flag) {
+            case "all":
+                return tasks;
+            case "done":
+                return tasks.filter((item) => item.done);
+            case "active":
+                return tasks.filter((item) => !item.done);
+            default:
+                return tasks;
+
+        }
+    }
+
+    onFlagChange = (flag) => {
+        this.setState({
+            flag
+        });
+    }
 
     render() {
-        const { todoData, filter } = this.state;
+        const { todoData, filter, flag } = this.state;
 
         const doneCount = todoData.filter((el) => el.done).length;
         const restCount = todoData.length - doneCount;
 
-        const visibleTasks = this.searchFunc(todoData, filter);
+        const visibleTasks = this.toggleFlags(this.searchFunc(todoData, filter), flag);
 
         return (
             <div className="todo-app">
                 <AppHeader todo={restCount} done={doneCount} />
                 <div className="search-panel d-flex">
-                    <SearchPanel onChange={this.onChangeField}/>
-                    <ItemStatusFilter />
+                    <SearchPanel onChange={this.onChangeField} />
+                    <ItemStatusFilter flag={flag} onFlagChange={this.onFlagChange}/>
                 </div>
                 <TodoList
                     todos={visibleTasks}
